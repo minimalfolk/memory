@@ -1,235 +1,215 @@
-document.addEventListener('DOMContentLoaded', () => {
-  const memoryForm = document.getElementById('memory-form');
-  const favoriteList = document.getElementById('favorite-list');
-  const memoryList = document.getElementById('memory-list');
-  const favoriteMemoriesSection = document.getElementById('favorite-memories');
-  const searchInput = document.getElementById('search-bar');
+// script.js
 
-  let isFavoritePage = false; // To check whether it's index.html or user.html
+// Retrieve memories from local storage
+function getMemories() {
+  const memories = JSON.parse(localStorage.getItem('memories')) || [];
+  return memories;
+}
 
-  // Helper function to load and display memories (all or favorites)
-  const loadMemories = (isFavoriteOnly = false) => {
-    const memories = JSON.parse(localStorage.getItem('memories')) || [];
-    const filteredMemories = isFavoriteOnly
-      ? memories.filter(memory => memory.favorite)
-      : memories;
+// Save memory to local storage
+function saveMemory(memory) {
+  const memories = getMemories();
+  memories.push(memory);
+  localStorage.setItem('memories', JSON.stringify(memories));
+}
 
-    // Display filtered memories based on whether it's the favorites view or all memories
-    if (isFavoriteOnly && favoriteMemoriesSection) {
-      favoriteMemoriesSection.style.display = filteredMemories.length > 0 ? 'block' : 'none';
-      favoriteList.innerHTML = ''; // Clear favorite list
+// Delete memory
+function deleteMemory(index) {
+  const memories = getMemories();
+  memories.splice(index, 1); // Remove memory at index
+  localStorage.setItem('memories', JSON.stringify(memories));
+  displayFavorites(); // Refresh the favorites list
+  displayAllMemories(getMemories()); // Refresh the all memories list
+}
 
-      filteredMemories.forEach((memory, index) => {
-        const memoryItem = createMemoryCard(memory, index, true);
-        favoriteList.appendChild(memoryItem);
-      });
+// Edit memory
+function editMemory(index) {
+  const memories = getMemories();
+  const memory = memories[index];
+  document.getElementById('memory-category').value = memory.category;
+  document.getElementById('memory-topic').value = memory.topic;
+  document.getElementById('memory-details').value = memory.details;
+  document.getElementById('memory-tags').value = memory.tags.join(', ');
 
-      if (filteredMemories.length === 0) {
-        favoriteList.innerHTML = `<p class="no-memories">No favorite memories added yet.</p>`;
-      }
-    }
-
-    if (!isFavoriteOnly && memoryList) {
-      memoryList.innerHTML = ''; // Clear all memories list
-
-      filteredMemories.forEach((memory, index) => {
-        const memoryItem = createMemoryCard(memory, index, false);
-        memoryList.appendChild(memoryItem);
-      });
-
-      if (filteredMemories.length === 0) {
-        memoryList.innerHTML = `<p class="no-memories">No memories added yet.</p>`;
-      }
-    }
-  };
-
-  // Create memory card element
-  const createMemoryCard = (memory, index, isFavoriteView) => {
-    const memoryCard = document.createElement('div');
-    memoryCard.classList.add('memory-card');
-    memoryCard.innerHTML = `
-      <p><strong>Category:</strong> ${memory.category || 'N/A'} | <strong>Tags:</strong> ${memory.tags.join(', ') || 'N/A'} | <strong>Date:</strong> ${memory.date}</p>
-      <h3>${memory.topic}</h3>
-      <p>${truncateText(memory.details)}</p>
-      <button class="view-more" data-index="${index}">View More</button>
-      ${
-        !isFavoriteView
-          ? `<button class="edit-memory" data-index="${index}">Edit</button>
-             <button class="delete-memory" data-index="${index}">Delete</button>
-             <button class="favorite-memory" data-index="${index}">${memory.favorite ? 'Unfavorite' : 'Favorite'}</button>`
-          : ''
-      }
-    `;
-
-    // Add event listeners
-    memoryCard.querySelector('.view-more').addEventListener('click', () => viewMore(index));
-    if (!isFavoriteView) {
-      memoryCard.querySelector('.edit-memory').addEventListener('click', () => editMemory(index));
-      memoryCard.querySelector('.delete-memory').addEventListener('click', () => deleteMemoryPrompt(index));
-      memoryCard.querySelector('.favorite-memory').addEventListener('click', () => toggleFavorite(index));
-    }
-
-    return memoryCard;
-  };
-
-  // Truncate text for display
-  const truncateText = (text, maxLength = 100) => {
-    return text.length > maxLength ? text.substring(0, maxLength) + '...' : text;
-  };
-
-  // View more details for a memory
-  const viewMore = (index) => {
-    const memories = JSON.parse(localStorage.getItem('memories')) || [];
-    if (index < 0 || index >= memories.length) {
-      alert("Invalid memory selected.");
-      return;
-    }
-    const memory = memories[index];
-    alert(`Memory Details:\n\n${memory.details}`);
-  };
-
-  // Add new memory
-  memoryForm?.addEventListener('submit', (e) => {
+  // Change form submit handler to update memory instead of adding new one
+  document.getElementById('memory-form').onsubmit = function (e) {
     e.preventDefault();
-
-    const category = document.getElementById('memory-category').value.trim();
-    const topic = document.getElementById('memory-topic').value.trim();
-    const details = document.getElementById('memory-details').value.trim();
-    const tagsInput = document.getElementById('memory-tags').value.trim();
-
-    if (!category || !topic || !details || !tagsInput) {
-      alert("Please fill in all the fields.");
-      return;
-    }
-
-    const newMemory = {
-      category,
-      topic,
-      details,
-      tags: tagsInput.split(',').map(tag => tag.trim()).filter(tag => tag),
-      date: new Date().toLocaleString(),
-      favorite: false,
-    };
-
-    const memories = JSON.parse(localStorage.getItem('memories')) || [];
-    memories.push(newMemory);
-    localStorage.setItem('memories', JSON.stringify(memories));
-
-    memoryForm.reset();
-    loadMemories(isFavoritePage); // Reload memories based on page view (favorites or all)
-  });
-
-  // Edit memory
-  const editMemory = (index) => {
-    const memories = JSON.parse(localStorage.getItem('memories')) || [];
-    if (index < 0 || index >= memories.length) {
-      alert("Invalid memory selected.");
-      return;
-    }
-
-    const memory = memories[index];
-    const newTopic = prompt('Edit Topic:', memory.topic);
-
-    if (newTopic !== null && newTopic.trim() !== "") {
-      memory.topic = newTopic.trim();
-    }
-
-    const newTags = prompt('Edit Tags (comma-separated):', memory.tags.join(', '));
-    if (newTags !== null) {
-      memory.tags = newTags
-        .split(',')
-        .map(tag => tag.trim())
-        .filter(tag => tag);
-    }
-
-    memories[index] = memory;
-    localStorage.setItem('memories', JSON.stringify(memories));
-    loadMemories(isFavoritePage); // Reload memories based on page view
+    updateMemory(index);
   };
+}
 
-  // Toggle favorite status
-  const toggleFavorite = (index) => {
-    const memories = JSON.parse(localStorage.getItem('memories')) || [];
-    if (index < 0 || index >= memories.length) {
-      alert("Invalid memory selected.");
-      return;
-    }
+// Update memory after editing
+function updateMemory(index) {
+  const category = document.getElementById('memory-category').value;
+  const topic = document.getElementById('memory-topic').value;
+  const details = document.getElementById('memory-details').value;
+  const tags = document.getElementById('memory-tags').value;
 
-    memories[index].favorite = !memories[index].favorite;
-    localStorage.setItem('memories', JSON.stringify(memories));
-    loadMemories(isFavoritePage); // Reload memories based on page view
+  const memories = getMemories();
+  memories[index] = { 
+    category, 
+    topic, 
+    details, 
+    tags: tags.split(',').map(tag => tag.trim()),
+    date: new Date().toLocaleString(), // Automatically set the current date and time
+    favorite: false // Default to not favorited
   };
+  localStorage.setItem('memories', JSON.stringify(memories));
 
-  // Delete memory
-  const deleteMemory = (index) => {
-    const memories = JSON.parse(localStorage.getItem('memories')) || [];
-    if (index < 0 || index >= memories.length) {
-      alert("Invalid memory selected.");
-      return;
-    }
+  // Reset form and update memory lists
+  document.getElementById('memory-form').reset();
+  displayFavorites();
+  displayAllMemories(getMemories());
+}
 
-    memories.splice(index, 1);
-    localStorage.setItem('memories', JSON.stringify(memories));
-    loadMemories(isFavoritePage); // Reload memories based on page view
-  };
+// Display favorite memories on index.html
+function displayFavorites() {
+  const favoritesContainer = document.getElementById('favorite-list');
+  const noFavoritesMessage = document.getElementById('no-favorites-message');
+  const memories = getMemories();
+  favoritesContainer.innerHTML = ''; // Clear previous list
 
-  // Confirm delete memory
-  const deleteMemoryPrompt = (index) => {
-    if (confirm('Do you want to delete this memory?')) {
-      deleteMemory(index);
-    }
-  };
-
-  // Search memories based on query (filter by category, topic, tags)
-  const searchMemories = (query) => {
-    const memories = JSON.parse(localStorage.getItem('memories')) || [];
-    const filteredMemories = memories.filter(memory =>
-      memory.category.toLowerCase().includes(query.toLowerCase()) ||
-      memory.topic.toLowerCase().includes(query.toLowerCase()) ||
-      memory.tags.some(tag => tag.toLowerCase().includes(query.toLowerCase()))
-    );
-
-    if (isFavoritePage) {
-      favoriteList.innerHTML = ''; // Clear favorite list
-      filteredMemories.forEach((memory, index) => {
-        const memoryItem = createMemoryCard(memory, index, true);
-        favoriteList.appendChild(memoryItem);
-      });
-
-      if (filteredMemories.length === 0) {
-        favoriteList.innerHTML = `<p class="no-memories">No favorite memories added yet.</p>`;
-      }
-    } else {
-      memoryList.innerHTML = ''; // Clear all memories list
-      filteredMemories.forEach((memory, index) => {
-        const memoryItem = createMemoryCard(memory, index, false);
-        memoryList.appendChild(memoryItem);
-      });
-
-      if (filteredMemories.length === 0) {
-        memoryList.innerHTML = `<p class="no-memories">No memories added yet.</p>`;
-      }
-    }
-  };
-
-  // Live search functionality
-  if (searchInput) {
-    searchInput.addEventListener('input', (e) => {
-      searchMemories(e.target.value);
+  if (memories.length === 0) {
+    noFavoritesMessage.style.display = 'block';
+  } else {
+    noFavoritesMessage.style.display = 'none';
+    memories.forEach((memory, index) => {
+      const memoryDiv = document.createElement('div');
+      memoryDiv.classList.add('memory-item');
+      memoryDiv.innerHTML = `
+        <div class="memory-header">
+          <p><strong>Category:</strong> ${memory.category}</p>
+          <p><strong>Date:</strong> ${memory.date}</p>
+          <p><strong>Tags:</strong> ${memory.tags.join(', ')}</p>
+        </div>
+        <h4>${memory.topic}</h4>
+        <div><strong>Details:</strong> ${shortenText(memory.details, index)}</div>
+        <div class="memory-actions">
+          <button onclick="editMemory(${index})">✏️</button>
+          <button onclick="deleteMemory(${index})">🗑️</button>
+          <button onclick="toggleFavorite(${index})">${memory.favorite ? '❤️' : '🤍'}</button>
+        </div>
+      `;
+      favoritesContainer.appendChild(memoryDiv);
     });
   }
+}
 
-  // Initialize based on page type (index.html for favorites, user.html for all)
-  if (favoriteMemoriesSection) {
-    isFavoritePage = true;
-    loadMemories(true); // Index page - only favorites
-  } else if (memoryList) {
-    isFavoritePage = false;
-    loadMemories(); // User page - all memories
+// Toggle favorite status of a memory
+function toggleFavorite(index) {
+  const memories = getMemories();
+  memories[index].favorite = !memories[index].favorite;
+  localStorage.setItem('memories', JSON.stringify(memories));
+  displayFavorites(); // Refresh the favorites list
+}
+
+// Shorten text for details to show only 4 lines and add "View More" link
+function shortenText(text, index) {
+  const maxLines = 4; // Max number of lines to show
+  const lineHeight = 1.5; // Approximate line height in ems
+  const container = document.createElement('div');
+  container.style.display = 'inline-block';
+  container.style.maxHeight = `${maxLines * lineHeight}em`;
+  container.style.overflow = 'hidden';
+  container.style.whiteSpace = 'pre-wrap'; // Preserve line breaks in the text
+
+  const shortenedText = text.split('\n').slice(0, maxLines).join('\n');
+  container.textContent = shortenedText;
+
+  // Create "View More" link if the content exceeds maxLines
+  const viewMoreLink = document.createElement('a');
+  viewMoreLink.href = '#';
+  viewMoreLink.textContent = 'View More';
+  viewMoreLink.onclick = function() {
+    viewMore(index, text); // Show full text on click
+  };
+
+  if (text.split('\n').length > maxLines) {
+    container.appendChild(viewMoreLink);
   }
 
-  // Initial load for index.html
-  if (memoryForm) {
-    loadMemories();
-  }
+  return container.outerHTML;
+}
+
+// Show full details when 'View More' is clicked
+function viewMore(index, fullText) {
+  const memoryDiv = document.querySelectorAll('.memory-item')[index];
+  const detailsDiv = memoryDiv.querySelector('div');
+  detailsDiv.textContent = fullText; // Replace shortened text with full text
+  const viewMoreLink = memoryDiv.querySelector('a');
+  viewMoreLink.remove(); // Remove 'View More' link
+}
+
+// Handle memory form submission
+document.getElementById('memory-form').addEventListener('submit', function (e) {
+  e.preventDefault();
+
+  const category = document.getElementById('memory-category').value;
+  const topic = document.getElementById('memory-topic').value;
+  const details = document.getElementById('memory-details').value;
+  const tags = document.getElementById('memory-tags').value;
+
+  const newMemory = {
+    category,
+    topic,
+    details,
+    tags: tags.split(',').map(tag => tag.trim()), // Split and trim tags
+    date: new Date().toLocaleString(), // Automatically set the current date and time
+    favorite: false // Default to not favorited
+  };
+
+  saveMemory(newMemory);
+  displayFavorites(); // Refresh favorite memories list
+  this.reset(); // Reset form after submission
 });
+
+// Display all memories and allow filtering on all-memory.html
+function displayAllMemories(memories) {
+  const memoryList = document.getElementById('memory-list');
+  memoryList.innerHTML = ''; // Clear previous list
+
+  const searchTerm = document.getElementById('search-bar').value.toLowerCase();
+  const filteredMemories = memories.filter(memory => {
+    return (
+      memory.topic.toLowerCase().includes(searchTerm) ||
+      memory.details.toLowerCase().includes(searchTerm) ||
+      memory.category.toLowerCase().includes(searchTerm) ||
+      memory.tags.some(tag => tag.toLowerCase().includes(searchTerm))
+    );
+  });
+
+  filteredMemories.forEach((memory, index) => {
+    const memoryDiv = document.createElement('div');
+    memoryDiv.classList.add('memory-item');
+    memoryDiv.innerHTML = `
+      <div class="memory-header">
+        <p><strong>Category:</strong> ${memory.category}</p>
+        <p><strong>Date:</strong> ${memory.date}</p>
+        <p><strong>Tags:</strong> ${memory.tags.join(', ')}</p>
+      </div>
+      <h4>${memory.topic}</h4>
+      <p><strong>Details:</strong> ${shortenText(memory.details, index)}</p>
+      <div class="memory-actions">
+        <button onclick="editMemory(${index})">✏️</button>
+        <button onclick="deleteMemory(${index})">🗑️</button>
+        <button onclick="toggleFavorite(${index})">${memory.favorite ? '❤️' : '🤍'}</button>
+      </div>
+    `;
+    memoryList.appendChild(memoryDiv);
+  });
+}
+
+// Filter memories by category or other criteria on search input change
+document.getElementById('search-bar').addEventListener('input', function () {
+  displayAllMemories(getMemories());
+});
+
+// Initial call to display favorite memories on index.html
+if (document.body.contains(document.getElementById('favorite-list'))) {
+  displayFavorites();
+}
+
+// Initial call to display all memories on all-memory.html
+if (document.body.contains(document.getElementById('memory-list'))) {
+  displayAllMemories(getMemories());
+}
