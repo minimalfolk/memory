@@ -8,7 +8,7 @@
   <link rel="stylesheet" href="styles.css">
 </head>
 <body>
-  <!-- Header with search -->
+  <!-- Header -->
   <header>
     <div class="header-container">
       <a href="index.html" class="logo-link">
@@ -17,15 +17,21 @@
         </div>
       </a>
       <div class="header-actions">
-        <a href="user.html" class="user-link">Me</a>
-        <input type="text" id="search-bar" class="search-bar" placeholder="Search memories...">
+        <a href="index.html" class="user-link">Home</a>
       </div>
     </div>
   </header>
 
-  <!-- Main content displaying memories -->
+  <!-- Main Content -->
   <main>
-    <div id="memory-list"></div>
+    <!-- Search Bar for Filtering Memories -->
+    <input type="text" id="search-bar" placeholder="Search memories by text, category, tag, or topic..." oninput="filterMemories()">
+
+    <!-- All Memories Section -->
+    <div id="all-memories">
+      <h3>All Memories</h3>
+      <div id="memory-list"></div>
+    </div>
   </main>
 
   <!-- Footer -->
