@@ -151,7 +151,28 @@ document.addEventListener('DOMContentLoaded', () => {
       memory.topic.toLowerCase().includes(query.toLowerCase()) ||
       memory.tags.some(tag => tag.toLowerCase().includes(query.toLowerCase()))
     );
-    loadMemories(filteredMemories);
+
+    if (isFavoritePage) {
+      favoriteList.innerHTML = ''; // Clear favorite list
+      filteredMemories.forEach((memory, index) => {
+        const memoryItem = createMemoryCard(memory, index, true);
+        favoriteList.appendChild(memoryItem);
+      });
+
+      if (filteredMemories.length === 0) {
+        favoriteList.innerHTML = `<p class="no-memories">No favorite memories added yet.</p>`;
+      }
+    } else {
+      memoryList.innerHTML = ''; // Clear all memories list
+      filteredMemories.forEach((memory, index) => {
+        const memoryItem = createMemoryCard(memory, index, false);
+        memoryList.appendChild(memoryItem);
+      });
+
+      if (filteredMemories.length === 0) {
+        memoryList.innerHTML = `<p class="no-memories">No memories added yet.</p>`;
+      }
+    }
   };
 
   // Live search functionality
