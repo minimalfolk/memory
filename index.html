@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Memory Jar</title>
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <!-- Header -->
+  <header>
+    <div class="header-container">
+      <a href="index.html" style="text-decoration: none; color: inherit;">
+        <div class="logo">
+          <span class="logo-text">Memory Jar</span>
+        </div>
+      </a>
+      <div class="header-actions">
+        <a href="user.html" class="user.link">Me</a>
+      </div>
+    </div>
+  </header>
+
+  <!-- Add New Memory Form -->
+  <main>
+    <div id="memory-modal" class="modal">
+      <div class="modal-content">
+        <h3>Add New Memory</h3>
+        <form id="memory-form">
+          <label for="memory-category">Category:</label>
+          <input type="text" id="memory-category" placeholder="Memory category" required>
+
+          <label for="memory-topic">Topic:</label>
+          <input type="text" id="memory-topic" placeholder="Memory topic" required>
+
+          <label for="memory-details">Details:</label>
+          <textarea id="memory-details" placeholder="Memory details" required></textarea>
+
+          <label for="memory-tags">Tags:</label>
+          <input type="text" id="memory-tags" placeholder="Comma-separated tags" required>
+
+          <button type="submit" id="save-button">Save</button>
+        </form>
+      </div>
+    </div>
+  </main>
+
+  <!-- Footer -->
+  <footer>
+    <div class="footer-links">
+      <a href="contact.html">Contact</a>
+      <a href="about.html">About</a>
+      <a href="privacy.html">Privacy</a>
+      <a href="terms.html">Terms & Conditions</a>
+    </div>
+    <div class="social-media">
+      <a href="#"><img src="https://cdn-icons-png.flaticon.com/512/733/733547.png" alt="Facebook"></a>
+      <a href="#"><img src="https://cdn-icons-png.flaticon.com/512/733/733558.png" alt="Instagram"></a>
+      <a href="#"><img src="https://cdn-icons-png.flaticon.com/512/145/145807.png" alt="LinkedIn"></a>
+      <a href="#"><img src="https://cdn-icons-png.flaticon.com/512/733/733579.png" alt="Twitter"></a>
+      <a href="#"><img src="https://cdn-icons-png.flaticon.com/512/2111/2111646.png" alt="Snapchat"></a>
+    </div>
+    <div class="copyright">
+      ©2025 Memory Jar.
+    </div>
+  </footer>
+
+  <!-- Scripts -->
+  <script src="script.js"></script>
+</body>
+</html>
