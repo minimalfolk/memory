@@ -80,6 +80,10 @@ document.addEventListener('DOMContentLoaded', () => {
   // View more details for a memory
   const viewMore = (index) => {
     const memories = JSON.parse(localStorage.getItem('memories')) || [];
+    if (index < 0 || index >= memories.length) {
+      alert("Invalid memory selected.");
+      return;
+    }
     const memory = memories[index];
     alert(`Memory Details:\n\n${memory.details}`);
   };
@@ -88,11 +92,21 @@ document.addEventListener('DOMContentLoaded', () => {
   memoryForm?.addEventListener('submit', (e) => {
     e.preventDefault();
 
+    const category = document.getElementById('memory-category').value.trim();
+    const topic = document.getElementById('memory-topic').value.trim();
+    const details = document.getElementById('memory-details').value.trim();
+    const tagsInput = document.getElementById('memory-tags').value.trim();
+
+    if (!category || !topic || !details || !tagsInput) {
+      alert("Please fill in all the fields.");
+      return;
+    }
+
     const newMemory = {
-      category: document.getElementById('memory-category').value,
-      topic: document.getElementById('memory-topic').value,
-      details: document.getElementById('memory-details').value,
-      tags: document.getElementById('memory-tags').value.split(',').map(tag => tag.trim()),
+      category,
+      topic,
+      details,
+      tags: tagsInput.split(',').map(tag => tag.trim()).filter(tag => tag),
       date: new Date().toLocaleString(),
       favorite: false,
     };
@@ -108,21 +122,39 @@ document.addEventListener('DOMContentLoaded', () => {
   // Edit memory
   const editMemory = (index) => {
     const memories = JSON.parse(localStorage.getItem('memories')) || [];
-    const memory = memories[index];
-
-    const newTopic = prompt('Edit Topic:', memory.topic);
-    if (newTopic !== null) {
-      memory.topic = newTopic;
-      memory.tags = prompt('Edit Tags (comma-separated):', memory.tags.join(', ')).split(',').map(tag => tag.trim());
-      memories[index] = memory;
-      localStorage.setItem('memories', JSON.stringify(memories));
-      loadMemories(isFavoritePage); // Reload memories based on page view
+    if (index < 0 || index >= memories.length) {
+      alert("Invalid memory selected.");
+      return;
     }
+
+    const memory = memories[index];
+    const newTopic = prompt('Edit Topic:', memory.topic);
+
+    if (newTopic !== null && newTopic.trim() !== "") {
+      memory.topic = newTopic.trim();
+    }
+
+    const newTags = prompt('Edit Tags (comma-separated):', memory.tags.join(', '));
+    if (newTags !== null) {
+      memory.tags = newTags
+        .split(',')
+        .map(tag => tag.trim())
+        .filter(tag => tag);
+    }
+
+    memories[index] = memory;
+    localStorage.setItem('memories', JSON.stringify(memories));
+    loadMemories(isFavoritePage); // Reload memories based on page view
   };
 
   // Toggle favorite status
   const toggleFavorite = (index) => {
     const memories = JSON.parse(localStorage.getItem('memories')) || [];
+    if (index < 0 || index >= memories.length) {
+      alert("Invalid memory selected.");
+      return;
+    }
+
     memories[index].favorite = !memories[index].favorite;
     localStorage.setItem('memories', JSON.stringify(memories));
     loadMemories(isFavoritePage); // Reload memories based on page view
@@ -131,6 +163,11 @@ document.addEventListener('DOMContentLoaded', () => {
   // Delete memory
   const deleteMemory = (index) => {
     const memories = JSON.parse(localStorage.getItem('memories')) || [];
+    if (index < 0 || index >= memories.length) {
+      alert("Invalid memory selected.");
+      return;
+    }
+
     memories.splice(index, 1);
     localStorage.setItem('memories', JSON.stringify(memories));
     loadMemories(isFavoritePage); // Reload memories based on page view
