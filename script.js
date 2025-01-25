@@ -169,4 +169,9 @@ document.addEventListener('DOMContentLoaded', () => {
     isFavoritePage = false;
     loadMemories(); // User page - all memories
   }
+
+  // Initial load for index.html
+  if (memoryForm) {
+    loadMemories();
+  }
 });
