@@ -29,7 +29,14 @@
         <h3>Add New Memory</h3>
         <form id="memory-form">
           <label for="memory-category">Category:</label>
-          <input type="text" id="memory-category" placeholder="Memory category" required>
+          <select id="memory-category" required>
+            <option value="Personal">Personal</option>
+            <option value="Family">Family</option>
+            <option value="Friends">Friends</option>
+            <option value="Relationship">Relationship</option>
+            <option value="Achievement">Achievement</option>
+            <option value="Travel">Travel</option>
+          </select>
 
           <label for="memory-topic">Topic:</label>
           <input type="text" id="memory-topic" placeholder="Memory topic" required>
@@ -37,10 +44,10 @@
           <label for="memory-details">Details:</label>
           <textarea id="memory-details" placeholder="Memory details" required></textarea>
 
-          <label for="memory-tags">Tags:</label>
-          <input type="text" id="memory-tags" placeholder="Comma-separated tags" required>
+          <label for="memory-tags">Tags (optional):</label>
+          <input type="text" id="memory-tags" placeholder="Comma-separated tags">
 
-          <button type="submit" id="save-button">Save</button>
+          <button type="submit" id="save-button">Save Now</button>
         </form>
       </div>
     </div>
