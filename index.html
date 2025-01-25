@@ -22,43 +22,42 @@
     </div>
   </header>
 
-  <!-- Add New Memory Form -->
+  <!-- Main Body -->
   <main>
-    <div id="memory-modal" class="modal">
-      <div class="modal-content">
-        <h3>Add New Memory</h3>
-        <form id="memory-form">
-          <label for="memory-category">Category:</label>
-          <select id="memory-category" required>
-            <option value="personal">Personal</option>
-            <option value="family">Family</option>
-            <option value="friends">Friends</option>
-            <option value="relationship">Relationship</option>
-            <option value="achievement">Achievement</option>
-            <option value="travel">Travel</option>
-          </select>
+    <!-- Add New Memory Form (always visible) -->
+    <section id="add-memory-section">
+      <h3>Add New Memory</h3>
+      <form id="memory-form">
+        <label for="memory-category">Category:</label>
+        <select id="memory-category" required>
+          <option value="personal">Personal</option>
+          <option value="family">Family</option>
+          <option value="friends">Friends</option>
+          <option value="relationship">Relationship</option>
+          <option value="achievement">Achievement</option>
+          <option value="travel">Travel</option>
+        </select>
 
-          <label for="memory-topic">Topic:</label>
-          <input type="text" id="memory-topic" placeholder="Memory topic" required>
+        <label for="memory-topic">Topic:</label>
+        <input type="text" id="memory-topic" placeholder="Memory topic" required>
 
-          <label for="memory-details">Details:</label>
-          <textarea id="memory-details" placeholder="Details about memory" required></textarea>
+        <label for="memory-details">Details:</label>
+        <textarea id="memory-details" placeholder="Details about memory" required></textarea>
 
-          <label for="memory-tags">Tags (optional):</label>
-          <input type="text" id="memory-tags" placeholder="Comma-separated tags">
+        <label for="memory-tags">Tags (optional):</label>
+        <input type="text" id="memory-tags" placeholder="Comma-separated tags">
 
-          <button type="submit" id="save-button">Save</button>
-        </form>
-      </div>
-    </div>
+        <button type="submit">Save</button>
+      </form>
+    </section>
 
     <!-- Favorite Memories List -->
-    <div id="favorite-memories">
+    <section id="favorite-memories">
       <h3>Your Favorite Memories</h3>
       <div id="favorite-list">
         <p id="no-favorites-message" class="no-memories">No favorite memories added yet.</p>
       </div>
-    </div>
+    </section>
   </main>
 
   <!-- Footer -->
