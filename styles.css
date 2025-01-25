@@ -61,6 +61,26 @@ main {
   padding: 0 20px;
 }
 
+#add-memory-section {
+  padding: 20px;
+  background: #f9f9f9;
+  border: 1px solid #ddd;
+  border-radius: 8px;
+  margin-bottom: 20px;
+}
+
+.memory-card {
+  padding: 10px;
+  border: 1px solid #ddd;
+  border-radius: 8px;
+  margin-bottom: 10px;
+}
+
+.memory-card button {
+  margin-top: 10px;
+  display: block;
+}
+
 #search-bar {
   width: 100%;
   padding: 0.8rem;
