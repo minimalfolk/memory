@@ -67,6 +67,51 @@ main {
   border: 1px solid #ddd;
   border-radius: 8px;
   margin-bottom: 20px;
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+}
+
+#add-memory-section h3 {
+  font-size: 24px;
+  font-weight: 600;
+  margin-bottom: 20px;
+}
+
+#add-memory-section form label {
+  display: block;
+  margin: 10px 0 5px;
+  font-size: 16px;
+  font-weight: 600;
+  color: #333;
+}
+
+#add-memory-section form select,
+#add-memory-section form input,
+#add-memory-section form textarea {
+  width: 100%;
+  padding: 10px;
+  margin-bottom: 15px;
+  border: 1px solid #ccc;
+  border-radius: 5px;
+  font-size: 16px;
+}
+
+#add-memory-section form button {
+  padding: 10px 15px;
+  background-color: #3a8dff;
+  color: #fff;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+  font-size: 16px;
+  transition: background-color 0.3s ease, transform 0.3s ease;
+}
+
+#add-memory-section form button:hover {
+  background-color: #2671d5;
+}
+
+#add-memory-section form button:active {
+  transform: scale(0.95);
 }
 
 .memory-card {
