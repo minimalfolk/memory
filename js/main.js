@@ -1,114 +1,109 @@
-// Global variable to store selected memory index
-let selectedMemoryIndex = null;
+let memories = JSON.parse(localStorage.getItem('memories')) || [];
 
-// Function to show the options box
-function showOptionsBox(index, event) {
-  const optionsBox = document.getElementById("options-box");
-  selectedMemoryIndex = index;
+// Function to render all memories
+function renderMemories() {
+  const memoryContainer = document.getElementById('memories');
+  memoryContainer.innerHTML = '';
 
-  // Position the options box near the clicked button
-  optionsBox.style.top = `${event.clientY}px`;
-  optionsBox.style.left = `${event.clientX}px`;
-  optionsBox.style.display = "block";
+  memories.forEach((memory, index) => {
+    const memoryDiv = document.createElement('div');
+    memoryDiv.className = 'memory';
+    memoryDiv.innerHTML = `
+      <p><strong>Category:</strong> ${memory.category}</p>
+      <p><strong>Date:</strong> ${memory.date}</p>
+      <p><strong>Topic:</strong> ${memory.topic}</p>
+      <p>${memory.details}</p>
+      <p><strong>Tag:</strong> ${memory.tag || 'N/A'}</p>
+      <button onclick="editMemory(${index})">Edit</button>
+      <button onclick="deleteMemory(${index})">Delete</button>
+      <button onclick="toggleFavorite(${index})">
+        ${memory.favorite ? 'Unfavorite' : 'Favorite'}
+      </button>
+    `;
+    memoryContainer.appendChild(memoryDiv);
+  });
+  renderFavoriteMemories();
 }
 
-// Function to hide the options box
-function hideOptionsBox() {
-  const optionsBox = document.getElementById("options-box");
-  optionsBox.style.display = "none";
-}
+// Function to render favorite memories
+function renderFavoriteMemories() {
+  const favoriteContainer = document.getElementById('favoriteMemories');
+  const favoriteList = document.getElementById('favorites');
+  const favoriteMemories = memories.filter(memory => memory.favorite);
 
-// Function to edit a memory
-function editMemoryFromOptions() {
-  const memories = JSON.parse(localStorage.getItem("memories")) || [];
-
-  if (selectedMemoryIndex !== null && memories[selectedMemoryIndex]) {
-    const memory = memories[selectedMemoryIndex];
-
-    // Redirect to index.html with memory data pre-filled
-    const queryString = `?edit=true&index=${selectedMemoryIndex}&category=${encodeURIComponent(
-      memory.category
-    )}&topic=${encodeURIComponent(memory.topic)}&details=${encodeURIComponent(
-      memory.details
-    )}&tags=${encodeURIComponent(memory.tags || "")}`;
-    window.location.href = `index.html${queryString}`;
-  }
-
-  hideOptionsBox();
-}
-
-// Function to delete a memory
-function deleteMemoryFromOptions() {
-  const memories = JSON.parse(localStorage.getItem("memories")) || [];
-
-  if (selectedMemoryIndex !== null && memories[selectedMemoryIndex]) {
-    memories.splice(selectedMemoryIndex, 1);
-    localStorage.setItem("memories", JSON.stringify(memories));
-
-    // Reload the current page to reflect the changes
-    if (window.location.pathname.includes("all-memory.html")) {
-      loadAllMemories(); // Function from `all-memory.js`
-    } else if (window.location.pathname.includes("index.html")) {
-      loadFavoriteMemories(); // Function from `index.js`
-    }
-  }
-
-  hideOptionsBox();
-}
-
-// Function to toggle a memory as favorite
-function toggleFavoriteFromOptions() {
-  const memories = JSON.parse(localStorage.getItem("memories")) || [];
-
-  if (selectedMemoryIndex !== null && memories[selectedMemoryIndex]) {
-    memories[selectedMemoryIndex].isFavorite =
-      !memories[selectedMemoryIndex].isFavorite;
-    localStorage.setItem("memories", JSON.stringify(memories));
-
-    // Reload the page if on `all-memory.html`
-    if (window.location.pathname.includes("all-memory.html")) {
-      loadAllMemories(); // Function from `all-memory.js`
-    }
-
-    // Update the favorite list if on `index.html`
-    if (window.location.pathname.includes("index.html")) {
-      loadFavoriteMemories(); // Function from `index.js`
-    }
-  }
-
-  hideOptionsBox();
-}
-
-// Utility function to pre-fill form when editing a memory (on index.html)
-function prefillFormIfEditing() {
-  const urlParams = new URLSearchParams(window.location.search);
-  if (urlParams.get("edit") === "true") {
-    const index = urlParams.get("index");
-    const category = urlParams.get("category");
-    const topic = urlParams.get("topic");
-    const details = urlParams.get("details");
-    const tags = urlParams.get("tags");
-
-    // Populate the form fields with the memory data
-    document.getElementById("memory-category").value = category || "";
-    document.getElementById("memory-topic").value = topic || "";
-    document.getElementById("memory-details").value = details || "";
-    document.getElementById("memory-tags").value = tags || "";
-
-    // Remove edit-related query parameters after pre-filling
-    history.replaceState(null, null, window.location.pathname);
+  if (favoriteMemories.length > 0) {
+    favoriteContainer.style.display = 'block';
+    favoriteList.innerHTML = '';
+    favoriteMemories.forEach((memory, index) => {
+      const memoryDiv = document.createElement('div');
+      memoryDiv.className = 'favorite';
+      memoryDiv.innerHTML = `
+        <p><strong>Category:</strong> ${memory.category}</p>
+        <p><strong>Date:</strong> ${memory.date}</p>
+        <p><strong>Topic:</strong> ${memory.topic}</p>
+        <p>${memory.details}</p>
+        <p><strong>Tag:</strong> ${memory.tag || 'N/A'}</p>
+        <button onclick="toggleFavorite(${index}, true)">Unfavorite</button>
+      `;
+      favoriteList.appendChild(memoryDiv);
+    });
+  } else {
+    favoriteContainer.style.display = 'none';
   }
 }
 
-// Event listener for clicking outside the options box
-document.addEventListener("click", (event) => {
-  const optionsBox = document.getElementById("options-box");
-  if (optionsBox && !optionsBox.contains(event.target)) {
-    hideOptionsBox();
+// Save memory to localStorage
+function saveMemory(memory) {
+  memories.push(memory);
+  localStorage.setItem('memories', JSON.stringify(memories));
+  renderMemories();
+}
+
+// Function to toggle favorite status
+function toggleFavorite(index, isFavoriteView = false) {
+  // Adjust index for favorite view if needed
+  if (isFavoriteView) {
+    const favoriteMemories = memories.filter(memory => memory.favorite);
+    const originalIndex = memories.indexOf(favoriteMemories[index]);
+    memories[originalIndex].favorite = !memories[originalIndex].favorite;
+  } else {
+    memories[index].favorite = !memories[index].favorite;
   }
+
+  localStorage.setItem('memories', JSON.stringify(memories));
+  renderMemories();
+}
+
+// Function to delete memory
+function deleteMemory(index) {
+  if (confirm('Do you want to delete this memory?')) {
+    memories.splice(index, 1);
+    localStorage.setItem('memories', JSON.stringify(memories));
+    renderMemories();
+  }
+}
+
+// Handle form submission
+document.getElementById('memoryForm').addEventListener('submit', function (e) {
+  e.preventDefault();
+
+  const category = document.getElementById('category').value;
+  const topic = document.getElementById('topic').value;
+  const details = document.getElementById('details').value;
+  const tag = document.getElementById('tag').value;
+
+  const memory = {
+    category,
+    topic,
+    details,
+    tag,
+    date: new Date().toLocaleString(),
+    favorite: false,
+  };
+
+  saveMemory(memory);
+  this.reset();
 });
 
-// Pre-fill the form if editing a memory (only applies to index.html)
-if (window.location.pathname.includes("index.html")) {
-  document.addEventListener("DOMContentLoaded", prefillFormIfEditing);
-}
+// Load memories from localStorage and render on page load
+renderMemories();
