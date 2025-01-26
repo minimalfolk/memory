@@ -10,9 +10,9 @@
   --secondary-color: #2671d5;
   --accent-color: #007BFF;
   --text-color: #333;
-  --bg-color: #ffffff; /* Updated background color to white */
-  --footer-bg-color: #aed9e0; /* Updated footer background color */
-  --header-bg-color: #aed9e0; /* Updated header background color */
+  --bg-color: #ffffff;
+  --footer-bg-color: #aed9e0;
+  --header-bg-color: #aed9e0;
   --border-radius: 8px;
   --transition-speed: 0.3s;
 }
@@ -65,8 +65,8 @@ header {
 }
 
 .logo img {
-  width: 40px; /* Set logo width */
-  height: 40px; /* Set logo height */
+  width: 40px;
+  height: 40px;
   margin-right: 10px;
 }
 
@@ -96,7 +96,7 @@ header {
 
 /* Main Content */
 main {
-  flex: 1; /* Pushes the footer to the bottom */
+  flex: 1;
   padding: 20px;
 }
 
@@ -129,9 +129,9 @@ footer {
 
 .social-media {
   display: flex;
-  justify-content: space-between; /* Distributes items evenly with space between */
+  justify-content: space-between;
   gap: 10px;
-  width: 100%; /* Makes sure the items stretch across the available width */
+  width: 100%;
 }
 
 .social-media img {
@@ -168,6 +168,39 @@ button:hover {
 
 button:active {
   transform: scale(0.95);
+}
+
+/* New Option Box Styles */
+.option-box {
+  background: rgba(255, 255, 255, 0.8); /* Semi-transparent white */
+  backdrop-filter: blur(10px); /* Blur effect */
+  border-radius: var(--border-radius);
+  padding: 20px;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+  width: 250px;
+  margin: 0 auto;
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  display: none; /* Hidden by default, shown via JS */
+}
+
+.option-box hr {
+  border: 1px solid #ddd;
+  margin: 10px 0;
+}
+
+.option-box .option {
+  padding: 10px;
+  font-size: 16px;
+  cursor: pointer;
+  transition: background-color var(--transition-speed);
+}
+
+.option-box .option:hover {
+  background-color: var(--primary-color);
+  color: #fff;
 }
 
 /* Responsive Design */
