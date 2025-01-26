@@ -1,130 +1,112 @@
-// Retrieve memories from local storage
-function getMemories() {
-  const memories = JSON.parse(localStorage.getItem('memories')) || [];
-  return memories;
+// Global variable to store currently selected memory index
+let selectedMemoryIndex = null;
+
+// Function to show the options box
+function showOptionsBox(index, event) {
+  const optionsBox = document.getElementById("options-box");
+  selectedMemoryIndex = index;
+
+  // Position the options box near the clicked button
+  optionsBox.style.top = `${event.clientY}px`;
+  optionsBox.style.left = `${event.clientX}px`;
+  optionsBox.style.display = "block";
 }
 
-// Save memory to local storage
-function saveMemory(memory) {
-  const memories = getMemories();
-  memories.push(memory);
-  localStorage.setItem('memories', JSON.stringify(memories));
+// Function to hide the options box
+function hideOptionsBox() {
+  const optionsBox = document.getElementById("options-box");
+  optionsBox.style.display = "none";
 }
 
-// Delete memory
-function deleteMemory(index) {
-  const memories = getMemories();
-  memories.splice(index, 1); // Remove memory at index
-  localStorage.setItem('memories', JSON.stringify(memories));
-  displayFavorites(); // Refresh the favorites list
-  displayAllMemories(getMemories()); // Refresh the all memories list
-}
-
-// Edit memory
-function editMemory(index) {
-  const memories = getMemories();
-  const memory = memories[index];
-  document.getElementById('memory-category').value = memory.category;
-  document.getElementById('memory-topic').value = memory.topic;
-  document.getElementById('memory-details').value = memory.details;
-  document.getElementById('memory-tags').value = memory.tags.join(', ');
-
-  // Change form submit handler to update memory instead of adding new one
-  document.getElementById('memory-form').onsubmit = function (e) {
-    e.preventDefault();
-    updateMemory(index);
-  };
-}
-
-// Update memory after editing
-function updateMemory(index) {
-  const category = document.getElementById('memory-category').value;
-  const topic = document.getElementById('memory-topic').value;
-  const details = document.getElementById('memory-details').value;
-  const tags = document.getElementById('memory-tags').value;
-
-  const memories = getMemories();
-  memories[index] = { 
-    category, 
-    topic, 
-    details, 
-    tags: tags.split(',').map(tag => tag.trim()),
-    date: new Date().toLocaleString(), // Automatically set the current date and time
-    favorite: false // Default to not favorited
-  };
-  localStorage.setItem('memories', JSON.stringify(memories));
-
-  // Reset form and update memory lists
-  document.getElementById('memory-form').reset();
-  displayFavorites();
-  displayAllMemories(getMemories());
-}
-
-// Shorten text for details to show only 4 lines and add "View More" link
-function shortenText(text, index) {
-  const maxLines = 4; // Max number of lines to show
-  const lineHeight = 1.5; // Approximate line height in ems
-  const container = document.createElement('div');
-  container.style.display = 'inline-block';
-  container.style.maxHeight = `${maxLines * lineHeight}em`;
-  container.style.overflow = 'hidden';
-  container.style.whiteSpace = 'pre-wrap'; // Preserve line breaks in the text
-
-  const shortenedText = text.split('\n').slice(0, maxLines).join('\n');
-  container.textContent = shortenedText;
-
-  // Create "View More" link if the content exceeds maxLines
-  const viewMoreLink = document.createElement('a');
-  viewMoreLink.href = '#';
-  viewMoreLink.textContent = 'View More';
-  viewMoreLink.onclick = function() {
-    viewMore(index, text); // Show full text on click
-  };
-
-  if (text.split('\n').length > maxLines) {
-    container.appendChild(viewMoreLink);
-  }
-
-  return container.outerHTML;
-}
-
-// Show full details when 'View More' is clicked
-function viewMore(index, fullText) {
-  const memoryDiv = document.querySelectorAll('.memory-item')[index];
-  const detailsDiv = memoryDiv.querySelector('div');
-  detailsDiv.textContent = fullText; // Replace shortened text with full text
-  const viewMoreLink = memoryDiv.querySelector('a');
-  viewMoreLink.remove(); // Remove 'View More' link
-}
-
-// Show options box when clicking the "Options" button
-function showOptionsBox(index) {
-  selectedMemoryIndex = index; // Set the selected memory index
-  document.getElementById('options-box').style.display = 'block';
-}
-
-// Hide options box when clicking outside
-window.onclick = function(event) {
-  const box = document.getElementById('options-box');
-  if (event.target !== box && !box.contains(event.target)) {
-    box.style.display = 'none';
-  }
-}
-
-// Edit memory from options
+// Function to edit a memory
 function editMemoryFromOptions() {
-  editMemory(selectedMemoryIndex);
-  document.getElementById('options-box').style.display = 'none';
+  const memories = JSON.parse(localStorage.getItem("memories")) || [];
+
+  if (selectedMemoryIndex !== null && memories[selectedMemoryIndex]) {
+    const memory = memories[selectedMemoryIndex];
+
+    // Redirect to index.html with memory data pre-filled
+    const queryString = `?edit=true&index=${selectedMemoryIndex}&category=${encodeURIComponent(
+      memory.category
+    )}&topic=${encodeURIComponent(memory.topic)}&details=${encodeURIComponent(
+      memory.details
+    )}&tags=${encodeURIComponent(memory.tags || "")}`;
+    window.location.href = `index.html${queryString}`;
+  }
+
+  hideOptionsBox();
 }
 
-// Delete memory from options
+// Function to delete a memory
 function deleteMemoryFromOptions() {
-  deleteMemory(selectedMemoryIndex);
-  document.getElementById('options-box').style.display = 'none';
+  const memories = JSON.parse(localStorage.getItem("memories")) || [];
+
+  if (selectedMemoryIndex !== null && memories[selectedMemoryIndex]) {
+    memories.splice(selectedMemoryIndex, 1);
+    localStorage.setItem("memories", JSON.stringify(memories));
+
+    // Reload the current page to reflect the changes
+    if (window.location.pathname.includes("all-memory.html")) {
+      loadAllMemories();
+    }
+  }
+
+  hideOptionsBox();
 }
 
-// Toggle favorite from options
+// Function to toggle a memory as favorite
 function toggleFavoriteFromOptions() {
-  toggleFavorite(selectedMemoryIndex);
-  document.getElementById('options-box').style.display = 'none';
+  const memories = JSON.parse(localStorage.getItem("memories")) || [];
+
+  if (selectedMemoryIndex !== null && memories[selectedMemoryIndex]) {
+    memories[selectedMemoryIndex].isFavorite =
+      !memories[selectedMemoryIndex].isFavorite;
+    localStorage.setItem("memories", JSON.stringify(memories));
+
+    // Reload the page if on all-memory.html
+    if (window.location.pathname.includes("all-memory.html")) {
+      loadAllMemories();
+    }
+
+    // Update the favorite list if on index.html
+    if (window.location.pathname.includes("index.html")) {
+      loadFavoriteMemories();
+    }
+  }
+
+  hideOptionsBox();
+}
+
+// Utility function to pre-fill form when editing a memory (on index.html)
+function prefillFormIfEditing() {
+  const urlParams = new URLSearchParams(window.location.search);
+  if (urlParams.get("edit") === "true") {
+    const index = urlParams.get("index");
+    const category = urlParams.get("category");
+    const topic = urlParams.get("topic");
+    const details = urlParams.get("details");
+    const tags = urlParams.get("tags");
+
+    // Populate the form fields with the memory data
+    document.getElementById("memory-category").value = category || "";
+    document.getElementById("memory-topic").value = topic || "";
+    document.getElementById("memory-details").value = details || "";
+    document.getElementById("memory-tags").value = tags || "";
+
+    // Remove edit-related query parameters after pre-filling
+    history.replaceState(null, null, window.location.pathname);
+  }
+}
+
+// Event listener for clicking outside the options box
+document.addEventListener("click", (event) => {
+  const optionsBox = document.getElementById("options-box");
+  if (optionsBox && !optionsBox.contains(event.target)) {
+    hideOptionsBox();
+  }
+});
+
+// Pre-fill the form if editing a memory (only applies to index.html)
+if (window.location.pathname.includes("index.html")) {
+  document.addEventListener("DOMContentLoaded", prefillFormIfEditing);
 }
