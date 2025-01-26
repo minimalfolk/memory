@@ -1,4 +1,4 @@
-// Global variable to store currently selected memory index
+// Global variable to store selected memory index
 let selectedMemoryIndex = null;
 
 // Function to show the options box
@@ -47,7 +47,9 @@ function deleteMemoryFromOptions() {
 
     // Reload the current page to reflect the changes
     if (window.location.pathname.includes("all-memory.html")) {
-      loadAllMemories();
+      loadAllMemories(); // Function from `all-memory.js`
+    } else if (window.location.pathname.includes("index.html")) {
+      loadFavoriteMemories(); // Function from `index.js`
     }
   }
 
@@ -63,14 +65,14 @@ function toggleFavoriteFromOptions() {
       !memories[selectedMemoryIndex].isFavorite;
     localStorage.setItem("memories", JSON.stringify(memories));
 
-    // Reload the page if on all-memory.html
+    // Reload the page if on `all-memory.html`
     if (window.location.pathname.includes("all-memory.html")) {
-      loadAllMemories();
+      loadAllMemories(); // Function from `all-memory.js`
     }
 
-    // Update the favorite list if on index.html
+    // Update the favorite list if on `index.html`
     if (window.location.pathname.includes("index.html")) {
-      loadFavoriteMemories();
+      loadFavoriteMemories(); // Function from `index.js`
     }
   }
 
