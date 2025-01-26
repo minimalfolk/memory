@@ -1,71 +1,99 @@
-// Store the selected memory index
-let selectedMemoryIndex = null;
+// Constants and Selectors
+const memoryForm = document.getElementById('memory-form');
+const favoriteList = document.getElementById('favorite-list');
+const noFavoritesMessage = document.getElementById('no-favorites-message');
+const memoryCategory = document.getElementById('memory-category');
+const memoryTopic = document.getElementById('memory-topic');
+const memoryDetails = document.getElementById('memory-details');
+const memoryTags = document.getElementById('memory-tags');
 
-// Display favorite memories on index.html
-function displayFavorites() {
-  const favoritesContainer = document.getElementById('favorite-list');
-  const noFavoritesMessage = document.getElementById('no-favorites-message');
-  const memories = getMemories();
-  favoritesContainer.innerHTML = ''; // Clear previous list
+// Local Storage Key
+const MEMORY_STORAGE_KEY = 'memojar_memories';
 
-  if (memories.length === 0) {
-    noFavoritesMessage.style.display = 'block';
-  } else {
-    noFavoritesMessage.style.display = 'none';
-    memories.forEach((memory, index) => {
-      const memoryDiv = document.createElement('div');
-      memoryDiv.classList.add('memory-item');
-      memoryDiv.innerHTML = `
-        <div class="memory-header">
-          <p><strong>Category:</strong> ${memory.category}</p>
-          <p><strong>Date:</strong> ${memory.date}</p>
-          <p><strong>Tags:</strong> ${memory.tags.join(', ')}</p>
-        </div>
-        <h4>${memory.topic}</h4>
-        <div><strong>Details:</strong> ${shortenText(memory.details, index)}</div>
-        <div class="memory-actions">
-          <button onclick="showOptionsBox(${index})">✏️Edit</button>
-          <button onclick="deleteMemory(${index})">🗑️Delete</button>
-          <button onclick="toggleFavorite(${index})">${memory.favorite ? '❤️Favorite' : '🤍Unfavorite'}</button>
-        </div>
-      `;
-      favoritesContainer.appendChild(memoryDiv);
-    });
-  }
-}
+// Utility Functions
+const loadMemories = () => {
+  const storedMemories = localStorage.getItem(MEMORY_STORAGE_KEY);
+  return storedMemories ? JSON.parse(storedMemories) : [];
+};
 
-// Toggle favorite status of a memory
-function toggleFavorite(index) {
-  const memories = getMemories();
-  memories[index].favorite = !memories[index].favorite;
-  localStorage.setItem('memories', JSON.stringify(memories));
-  displayFavorites(); // Refresh the favorites list
-}
+const saveMemories = (memories) => {
+  localStorage.setItem(MEMORY_STORAGE_KEY, JSON.stringify(memories));
+};
 
-// Handle memory form submission
-document.getElementById('memory-form').addEventListener('submit', function (e) {
+const generateMemoryId = () => `memory-${Date.now()}`;
+
+// Add Memory
+memoryForm.addEventListener('submit', (e) => {
   e.preventDefault();
 
-  const category = document.getElementById('memory-category').value;
-  const topic = document.getElementById('memory-topic').value;
-  const details = document.getElementById('memory-details').value;
-  const tags = document.getElementById('memory-tags').value;
+  const category = memoryCategory.value;
+  const topic = memoryTopic.value.trim();
+  const details = memoryDetails.value.trim();
+  const tags = memoryTags.value.trim().split(',').map(tag => tag.trim()).filter(tag => tag !== '');
+
+  if (!topic || !details) {
+    alert('Please fill out the topic and details fields.');
+    return;
+  }
 
   const newMemory = {
+    id: generateMemoryId(),
     category,
     topic,
     details,
-    tags: tags.split(',').map(tag => tag.trim()), // Split and trim tags
-    date: new Date().toLocaleString(), // Automatically set the current date and time
-    favorite: false // Default to not favorited
+    tags,
+    favorite: false,
+    createdAt: new Date().toISOString(),
   };
 
-  saveMemory(newMemory);
-  displayFavorites(); // Refresh favorite memories list
-  this.reset(); // Reset form after submission
+  const memories = loadMemories();
+  memories.push(newMemory);
+  saveMemories(memories);
+
+  memoryForm.reset();
+  alert('Memory saved successfully!');
+  updateFavoriteList(); // Update the favorites if needed
 });
 
-// Initial call to display favorite memories on index.html
-if (document.body.contains(document.getElementById('favorite-list'))) {
-  displayFavorites();
-}
+// Update Favorite List
+const updateFavoriteList = () => {
+  const memories = loadMemories();
+  const favoriteMemories = memories.filter(memory => memory.favorite);
+
+  favoriteList.innerHTML = '';
+
+  if (favoriteMemories.length === 0) {
+    noFavoritesMessage.style.display = 'block';
+    return;
+  }
+
+  noFavoritesMessage.style.display = 'none';
+
+  favoriteMemories.forEach(memory => {
+    const memoryDiv = document.createElement('div');
+    memoryDiv.className = 'favorite-memory';
+    memoryDiv.innerHTML = `
+      <h4>${memory.topic}</h4>
+      <p>${memory.details}</p>
+      <span class="category">Category: ${memory.category}</span>
+    `;
+    favoriteList.appendChild(memoryDiv);
+  });
+};
+
+// Toggle Favorite Memory
+const toggleFavorite = (id) => {
+  const memories = loadMemories();
+  const memoryIndex = memories.findIndex(memory => memory.id === id);
+
+  if (memoryIndex > -1) {
+    memories[memoryIndex].favorite = !memories[memoryIndex].favorite;
+    saveMemories(memories);
+    updateFavoriteList();
+  }
+};
+
+// On Page Load
+document.addEventListener('DOMContentLoaded', () => {
+  updateFavoriteList();
+});
