@@ -10,9 +10,9 @@
   --secondary-color: #2671d5;
   --accent-color: #007BFF;
   --text-color: #333;
-  --bg-color: #faf3dd;
-  --footer-bg-color: #3a8dff;
-  --header-bg-color: #3a8dff;
+  --bg-color: #ffffff; /* Updated background color to white */
+  --footer-bg-color: #aed9e0; /* Updated footer background color */
+  --header-bg-color: #aed9e0; /* Updated header background color */
   --border-radius: 8px;
   --transition-speed: 0.3s;
 }
@@ -129,8 +129,9 @@ footer {
 
 .social-media {
   display: flex;
-  justify-content: center;
+  justify-content: space-between; /* Distributes items evenly with space between */
   gap: 10px;
+  width: 100%; /* Makes sure the items stretch across the available width */
 }
 
 .social-media img {
